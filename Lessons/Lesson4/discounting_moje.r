@@ -1,5 +1,5 @@
 ---
-  title: "Discounting"
+title: "Discounting"
 output: html_notebook
 ---
   
@@ -13,23 +13,17 @@ class were produced. It is a very simple way to get many answers like:
   
   There are far more questions and answers available, and there are many methods that can do the job. But for now, let's understand
 at least the basics.
-
-
 ### What is a triangle
 As losses take sometimes a number of years to be reported and then some more years to be paid, it is very hard
 to say at the end of the year whether we have "saved" enough money. For this reason, it makes sense to keep history
 of all claims related to 1 period.
-
 Imagine this simple situation that shows a history of a single policy:
-
 1) 1st December 2016 - insurance contract was signed to protect against car crash injury
 2) 20th November 2017 - there was an accident. The person goes to hospital and does not care about calling insurance company
 3) 1st January 2018 - person is finally home, but he will not be able to work for unknown time
 4) 5th January 2018 - claim is reported. Doctors say, the person may require anoteher surgery in 6 months
 5) 1st February 2018 - new symptoms are found (they seem to be coming from the accident) ...
 6) a few years later - the person finally starts working, but is partially disabled
-
-
 #### Think about which year each information relates to (Exercise 0)
 _Write down into your notes, what you think... In which year(s) of data can we find the above situation. Then let's discuss._
 
@@ -54,9 +48,9 @@ library(ChainLadder)
 ```
 Load data about KPIs
 ```{r}
-dt_KPI <- read.csv("C:/Users/sabolova53/GeneralInsurance_Class/Data/lesson2_KPI.csv")
-dt_LatestView <- read.csv("C:/Users/sabolova53/GeneralInsurance_Class/Data/lesson4_latestView.csv")
-dt_PaidCase <- read.csv("C:/Users/sabolova53/GeneralInsurance_Class/Data/lesson4_PaidCase.csv")
+dt_KPI <- read.csv("/Users/bobo/Downloads/lesson2_KPI.csv")
+dt_LatestView <- read.csv("/Users/bobo/Downloads/lesson4_latestView.csv")
+dt_PaidCase <- read.csv("/Users/bobo/Downloads/lesson4_PaidCase.csv")
 ```
 
 #### Exercise 1
@@ -95,33 +89,29 @@ Now let's have a look at a couple of different triangles. The data is provided f
 It also shows 2 different claim types for each. Can you describe how different they are?
 Hint: Consider the length of tail, volatility, average sizes...
 Hint2: There are 2 types of data - paid and case. Start using Paid...
-
 _YOUR SOLUTION_
 understand the data => run some simple overviews
-
 create a variable => filter data and covert to triangle. then convert to cummulative to use chainladder
-
 _STEP 1: Take paid data for House business and Small claim size_
-
 ```{r}
 Paid_HH_sml <- dt_PaidCase %>% filter(Business == "House" & ClaimSize == "Small" & dataset_type == "PAID")
-head(Paid_HH_sml)
-```
 
+#head(Paid_HH_sml)
+#(Paid_HH_sml <- Paid_HH_sml[order(Paid_HH_sml$dy), ])
+```
 _STEP 2: Now convert the standard table into a triangle_
 Hint: %>% as.triangle(...)
-
 ```{r}
-Paid_HH_sml_triangle <- Paid_HH_sml %>% as.triangle(origin="ay", dev="dy", value="SumOfamount")
+Paid_HH_sml_triangle <- Paid_HH_sml %>% as.triangle(origin = "ay", dev = "dy", "SumOfamount")
+
+Paid_HH_sml_triangle <- triangle( Paid_HH_sml_triangle[,10], Paid_HH_sml_triangle[,9], Paid_HH_sml_triangle[,1], Paid_HH_sml_triangle[,2], Paid_HH_sml_triangle[,3], Paid_HH_sml_triangle[,4], Paid_HH_sml_triangle[,5], Paid_HH_sml_triangle[,6], Paid_HH_sml_triangle[,7], Paid_HH_sml_triangle[,8] )
+Paid_HH_sml_triangle
 ```
-
 _STEP 3: Now start plotting things to see more information_
-
 ```{r}
 plot(Paid_HH_sml_triangle, lattice=TRUE)
 plot(predict(chainladder(Paid_HH_sml_triangle)))
 ```
-
 _STEP 4: And get the aging factors and some other stat's out to see more details_
 Hint: ata(...)
 
@@ -132,15 +122,72 @@ ata(Paid_HH_sml_triangle)
 _Now repeat for all types of buiness and sizes of claims. Compare the findings..._
 
 ```{r}
-#Paid_HH_big <-
-#
+Paid_HH_lrg_triangle <- dt_PaidCase %>% filter(Business == "House" & ClaimSize == "Large" & dataset_type == "PAID") %>% as.triangle(origin = "ay", dev = "dy", "SumOfamount") 
+
+Paid_HH_lrg_triangle <- triangle( Paid_HH_lrg_triangle[,10], Paid_HH_lrg_triangle[,9], Paid_HH_lrg_triangle[,1], Paid_HH_lrg_triangle[,2], Paid_HH_lrg_triangle[,3], Paid_HH_lrg_triangle[,4], Paid_HH_lrg_triangle[,5], Paid_HH_lrg_triangle[,6], Paid_HH_lrg_triangle[,7], Paid_HH_lrg_triangle[,8] )
+Paid_HH_lrg_triangle
+
+ata(Paid_HH_lrg_triangle)
+
+
+Paid_3rd_sml_triangle <- dt_PaidCase %>% filter(Business == "3rd Party" & ClaimSize == "Small" & dataset_type == "PAID") %>% as.triangle(origin = "ay", dev = "dy", "SumOfamount") 
+
+Paid_3rd_sml_triangle <- triangle( Paid_3rd_sml_triangle[,10], Paid_3rd_sml_triangle[,9], Paid_3rd_sml_triangle[,1], Paid_3rd_sml_triangle[,2], Paid_3rd_sml_triangle[,3], Paid_3rd_sml_triangle[,4], Paid_3rd_sml_triangle[,5], Paid_3rd_sml_triangle[,6], Paid_3rd_sml_triangle[,7], Paid_3rd_sml_triangle[,8] )
+Paid_3rd_sml_triangle
+
+ata(Paid_3rd_sml_triangle)
+
+
+Paid_3rd_lrg_triangle <- dt_PaidCase %>% filter(Business == "3rd Party" & ClaimSize == "Large" & dataset_type == "PAID") %>% as.triangle(origin = "ay", dev = "dy", "SumOfamount") 
+
+Paid_3rd_lrg_triangle <- triangle( Paid_3rd_lrg_triangle[,10], Paid_3rd_lrg_triangle[,9], Paid_3rd_lrg_triangle[,1], Paid_3rd_lrg_triangle[,2], Paid_3rd_lrg_triangle[,3], Paid_3rd_lrg_triangle[,4], Paid_3rd_lrg_triangle[,5], Paid_3rd_lrg_triangle[,6], Paid_3rd_lrg_triangle[,7], Paid_3rd_lrg_triangle[,8] )
+Paid_3rd_lrg_triangle
+
+ata(Paid_3rd_lrg_triangle)
 ```
 
 _If you are now comforatble with what this does, try doing the same, but using additional information: The Case data!_
 Hint: Sum Paid and Case together to come up with the final claims estimates (the Incurred claims)
 
 ```{r}
+PaidCase_HH_sml <- dt_PaidCase %>% filter(Business == "House" & ClaimSize == "Small") %>% group_by(ay, dy) %>% summarise(SumOfamount = sum(SumOfamount))
 
+PaidCase_HH_sml_triangle <- as.triangle(PaidCase_3rd_lrg,origin = "ay", dev = "dy", "SumOfamount") 
+
+PaidCase_HH_sml_triangle <- triangle( PaidCase_HH_sml_triangle[,10], PaidCase_HH_sml_triangle[,9], PaidCase_HH_sml_triangle[,1], PaidCase_HH_sml_triangle[,2], PaidCase_HH_sml_triangle[,3], PaidCase_HH_sml_triangle[,4], PaidCase_HH_sml_triangle[,5], PaidCase_HH_sml_triangle[,6], PaidCase_HH_sml_triangle[,7], PaidCase_HH_sml_triangle[,8] )
+PaidCase_HH_sml_triangle
+
+ata(PaidCase_HH_sml_triangle)
+
+
+PaidCase_HH_lrg <- dt_PaidCase %>% filter(Business == "House" & ClaimSize == "Large") %>% group_by(ay, dy) %>% summarise(SumOfamount = sum(SumOfamount))
+
+PaidCase_HH_lrg_triangle <- as.triangle(PaidCase_3rd_lrg,origin = "ay", dev = "dy", "SumOfamount") 
+
+PaidCase_HH_lrg_triangle <- triangle( PaidCase_HH_lrg_triangle[,10], PaidCase_HH_lrg_triangle[,9], PaidCase_HH_lrg_triangle[,1], PaidCase_HH_lrg_triangle[,2], PaidCase_HH_lrg_triangle[,3], PaidCase_HH_lrg_triangle[,4], PaidCase_HH_lrg_triangle[,5], PaidCase_HH_lrg_triangle[,6], PaidCase_HH_lrg_triangle[,7], PaidCase_HH_lrg_triangle[,8] )
+PaidCase_HH_lrg_triangle
+
+ata(PaidCase_HH_lrg_triangle)
+
+
+PaidCase_3rd_sml <- dt_PaidCase %>% filter(Business == "3rd Party" & ClaimSize == "Small") %>% group_by(ay, dy) %>% summarise(SumOfamount = sum(SumOfamount))
+
+PaidCase_3rd_sml_triangle <- as.triangle(PaidCase_3rd_sml,origin = "ay", dev = "dy", "SumOfamount") 
+
+PaidCase_3rd_sml_triangle <- triangle( PaidCase_3rd_sml_triangle[,10], PaidCase_3rd_sml_triangle[,9], PaidCase_3rd_sml_triangle[,1], PaidCase_3rd_sml_triangle[,2], PaidCase_3rd_sml_triangle[,3], PaidCase_3rd_sml_triangle[,4], PaidCase_3rd_sml_triangle[,5], PaidCase_3rd_sml_triangle[,6], PaidCase_3rd_sml_triangle[,7], PaidCase_3rd_sml_triangle[,8] )
+PaidCase_3rd_sml_triangle
+
+ata(PaidCase_3rd_sml_triangle)
+
+
+PaidCase_3rd_lrg <- dt_PaidCase %>% filter(Business == "3rd Party" & ClaimSize == "Large") %>% group_by(ay, dy) %>% summarise(SumOfamount = sum(SumOfamount))
+
+PaidCase_3rd_lrg_triangle <- as.triangle(PaidCase_3rd_lrg,origin = "ay", dev = "dy", "SumOfamount") 
+
+PaidCase_3rd_lrg_triangle <- triangle( PaidCase_3rd_lrg_triangle[,10], PaidCase_3rd_lrg_triangle[,9], PaidCase_3rd_lrg_triangle[,1], PaidCase_3rd_lrg_triangle[,2], PaidCase_3rd_lrg_triangle[,3], PaidCase_3rd_lrg_triangle[,4], PaidCase_3rd_lrg_triangle[,5], PaidCase_3rd_lrg_triangle[,6], PaidCase_3rd_lrg_triangle[,7], PaidCase_3rd_lrg_triangle[,8] )
+PaidCase_3rd_lrg_triangle
+
+ata(PaidCase_3rd_lrg_triangle)
 ```
 
 
@@ -161,35 +208,21 @@ It is very unlikely, that we incur the whole loss on the *very first day*. This 
 
 Let's check the data now. Were your expectations above supported by the calculation?
 Add comments to your notes if needed...
-
-
 #### Exercise 4
 Use the data provided in exercise 2 and try to come up with an estimates of the average duration. 
 How does it work? Well, discounting apart, in what year does the average payment happen? 
 HINT: (Here you definitely use paid claims, and it is enough to calculate weighted average of incremental payment)
-
 _STEP 1: get the weights of incremental paid triangle => this is what we are intrested in because individual payments matter_
-
 ```{r}
-
 ```
-
 _STEP 2: average duration (calculate a weighted sum, where the weight is the number of year/total cummulative paid sum)_
-
 ```{r}
-
 ```
-
 _Does the value calculated correspond to your assumed value for the given business in Exercise 2? Comment on the findings in your notes..._
-
-
 Now let’s try to be more exact. What do we need to calculate this? Of course the interest rates, 
 but let’s park that for now and use just [risk free rates](https://en.wikipedia.org/wiki/Risk-free_interest_rate). 
-
 So what is the other most important factor?
-
 Usually we would use a formula like this one: `Loss_y = Loss_x * (1 + interest)^(y-x)`
-
 The durations until payments `(y-x)` is a generic answer. Information about the claims history 
 and the payments will help us derive it.
 We can start at simple averaging (as in the previous exercise) and saying that is the duration discounting for the period equal to aveage duration.
@@ -201,11 +234,8 @@ Now, assume an interest rate of 5%. How will the discounting change this?
   _Calculate a factor to be applied to the final incurred claims, to make discout it to present value._
 
 Let's start simply: What would the average disocunt factor be? Use the average duration from Exercise 4
-
 ```{r}
-
 ```
-
 _Now let's be more precise and use the appropriate weights and individual discount factors one by one_
 Hint: Discount every term of the sum in Exercise 3 by appropriate discount factor (1+i)^(-year)
 
@@ -266,42 +296,28 @@ _How much do you think a reasonable premium should be to protect the customers?_
 ### Risk based capital
 Insurance industry is very regulated. One of the main reason is the situation above. No government wants it's people
 to be unprotected or unpaid if a claim happens. That means, an insurance company must have some extra money on top of the expected claim payments to allow for the event to happen at different times then just average occurances (once every 100 year like in example above).
-
 What is driving the capital requirement?
-
-
 #### Exercise 8
 _Think about why a portfolio may need more (or less) capital to be allowed to insure business. Write down your ideas into your notes._
-
 Obviously, the bigger the size, the more capital is needed. But this still does not meant something is more or less risky.
 It is much better to weight the requirement by size. For this reason we use 
 `Capital_Intensity_Ratio(CIR) = Required_Capital / Net_Earned_Premium(NEP)`.
-
-
 #### Exercise 9
 Use the following data [CIR] to try to come up with some examples that support your ideas from your reflection in previous exercise.
 _Look at the data provided. Identify examples, where 2 portfolios are similar (1 dimension is different), and the CIR is bigger or smaller. Be creative and find any dependencies..._
-
 ```{r}
 CIR_data <- read.csv("./Data/lesson4_CIR.csv")
 ```
-
 What is the total value of capital required to run the whole business from lesson 2?
 Use the data provided that refers to the same portfolios, you were looking at in lesson2. 
 How has it changed over the years?
-
-
 ### Cost of capital
 As in the example above, there is no way for a starting insurance company to collect enough money up front. They are borrowed from shareholders or banks. These require interest in excess of risk free rate. You can try to find out a reasonable risk margin for insurance companies in google (depending on their rating and risk profile). Let's assume, we need to return additiona 10% on top of the money that we borrow. Let's also assume we have no free capital now and we have to borrow everything.
-
 How does this additional challenge change the porfitabilty of the buiness?
-
-
 #### Exercise 10  => Homeworks (group everything together)
 _Using the same data we have discounted, try to allow for additional 10% (on top of risk free rate) of the capital needed for that portfolio._
 What is the Economic profit before tax (NPV UWR - Capital costs) for each
 portfolio? Which one of them is the most profitable? Is the worst one from previous investigation still the worst?
-
 STEPS:
 You know what the Mean term is of the data (also part of CIR_data as the last column), as you know what the discount factors are 
 and you assumed 5% discount rate (Exercies 6) - chose whichevery you find more reasonable.
@@ -310,15 +326,11 @@ You also know the Net Earned Premium from earlier lessons (dt_KPI)
 How much does it cost to hold the Capital amount in terms of interest paid for that for the average (Mean Term) period?
 Now you can combine everything and calculate teh Economic Profit :)
 Hint1: Using 'dplyr' package and function left_join requires column names to be the same to join...
-
-
 ### Latest view of the loss development - EXTRA
 Ok, so now you should know something about triangles and discounting and capital and how it all links together. 
 There is another use of the triangles though and the very last adjustment to our profitability.
 As the external capital is usually quite expensive, insurers need to sometimes strengthen the reserves to have more money saved for adverse claims (like the flood in the capital section). There are also claims, that have happened and we are not aware of yet, which is another reason for having extra money saved. Over the years, the reserves are released, as claims are paid and the money is not needed. So can we somehow project what the future losses will be after all reserve releases?
 There is an additional dataset provided, that shows historical view of the losses for a given year, and it is updated year on year.
-
-
 #### BONUS HOMEWORK CANDIDATE - EXTRA BONUS
 Use this final triangle to come up with your view on what the ultimate loss for 2016 will look like for every portfolio.
 Calculate the extra money, that will be released in a couple of years.
