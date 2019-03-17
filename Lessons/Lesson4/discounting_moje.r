@@ -48,9 +48,9 @@ library(ChainLadder)
 ```
 Load data about KPIs
 ```{r}
-dt_KPI <- read.csv("/Users/bobo/Downloads/lesson2_KPI.csv")
-dt_LatestView <- read.csv("/Users/bobo/Downloads/lesson4_latestView.csv")
-dt_PaidCase <- read.csv("/Users/bobo/Downloads/lesson4_PaidCase.csv")
+dt_KPI <- read.csv("C:/GeneralInsurance_Class/Data/lesson2_KPI.csv")
+dt_LatestView <- read.csv("C:/GeneralInsurance_Class/Data/lesson4_latestView.csv")
+dt_PaidCase <- read.csv("C:/GeneralInsurance_Class/Data/lesson4_PaidCase.csv")
 ```
 
 #### Exercise 1
@@ -95,9 +95,7 @@ create a variable => filter data and covert to triangle. then convert to cummula
 _STEP 1: Take paid data for House business and Small claim size_
 ```{r}
 Paid_HH_sml <- dt_PaidCase %>% filter(Business == "House" & ClaimSize == "Small" & dataset_type == "PAID")
-
-#head(Paid_HH_sml)
-#(Paid_HH_sml <- Paid_HH_sml[order(Paid_HH_sml$dy), ])
+head(Paid_HH_sml)
 ```
 _STEP 2: Now convert the standard table into a triangle_
 Hint: %>% as.triangle(...)
@@ -127,21 +125,32 @@ Paid_HH_lrg_triangle <- dt_PaidCase %>% filter(Business == "House" & ClaimSize =
 Paid_HH_lrg_triangle <- triangle( Paid_HH_lrg_triangle[,10], Paid_HH_lrg_triangle[,9], Paid_HH_lrg_triangle[,1], Paid_HH_lrg_triangle[,2], Paid_HH_lrg_triangle[,3], Paid_HH_lrg_triangle[,4], Paid_HH_lrg_triangle[,5], Paid_HH_lrg_triangle[,6], Paid_HH_lrg_triangle[,7], Paid_HH_lrg_triangle[,8] )
 Paid_HH_lrg_triangle
 
+plot(Paid_HH_lrg_triangle, lattice=TRUE)
+plot(predict(chainladder(Paid_HH_lrg_triangle)))
+
 ata(Paid_HH_lrg_triangle)
 
+###
 
 Paid_3rd_sml_triangle <- dt_PaidCase %>% filter(Business == "3rd Party" & ClaimSize == "Small" & dataset_type == "PAID") %>% as.triangle(origin = "ay", dev = "dy", "SumOfamount") 
 
 Paid_3rd_sml_triangle <- triangle( Paid_3rd_sml_triangle[,10], Paid_3rd_sml_triangle[,9], Paid_3rd_sml_triangle[,1], Paid_3rd_sml_triangle[,2], Paid_3rd_sml_triangle[,3], Paid_3rd_sml_triangle[,4], Paid_3rd_sml_triangle[,5], Paid_3rd_sml_triangle[,6], Paid_3rd_sml_triangle[,7], Paid_3rd_sml_triangle[,8] )
 Paid_3rd_sml_triangle
 
+plot(Paid_3rd_sml_triangle, lattice=TRUE)
+plot(predict(chainladder(Paid_3rd_sml_triangle)))
+
 ata(Paid_3rd_sml_triangle)
 
+###
 
 Paid_3rd_lrg_triangle <- dt_PaidCase %>% filter(Business == "3rd Party" & ClaimSize == "Large" & dataset_type == "PAID") %>% as.triangle(origin = "ay", dev = "dy", "SumOfamount") 
 
 Paid_3rd_lrg_triangle <- triangle( Paid_3rd_lrg_triangle[,10], Paid_3rd_lrg_triangle[,9], Paid_3rd_lrg_triangle[,1], Paid_3rd_lrg_triangle[,2], Paid_3rd_lrg_triangle[,3], Paid_3rd_lrg_triangle[,4], Paid_3rd_lrg_triangle[,5], Paid_3rd_lrg_triangle[,6], Paid_3rd_lrg_triangle[,7], Paid_3rd_lrg_triangle[,8] )
 Paid_3rd_lrg_triangle
+
+plot(Paid_3rd_lrg_triangle, lattice=TRUE)
+plot(predict(chainladder(Paid_3rd_lrg_triangle)))
 
 ata(Paid_3rd_lrg_triangle)
 ```
@@ -157,8 +166,12 @@ PaidCase_HH_sml_triangle <- as.triangle(PaidCase_3rd_lrg,origin = "ay", dev = "d
 PaidCase_HH_sml_triangle <- triangle( PaidCase_HH_sml_triangle[,10], PaidCase_HH_sml_triangle[,9], PaidCase_HH_sml_triangle[,1], PaidCase_HH_sml_triangle[,2], PaidCase_HH_sml_triangle[,3], PaidCase_HH_sml_triangle[,4], PaidCase_HH_sml_triangle[,5], PaidCase_HH_sml_triangle[,6], PaidCase_HH_sml_triangle[,7], PaidCase_HH_sml_triangle[,8] )
 PaidCase_HH_sml_triangle
 
+plot(PaidCase_HH_sml_triangle, lattice=TRUE)
+plot(predict(chainladder(PaidCase_HH_sml_triangle)))
+
 ata(PaidCase_HH_sml_triangle)
 
+###
 
 PaidCase_HH_lrg <- dt_PaidCase %>% filter(Business == "House" & ClaimSize == "Large") %>% group_by(ay, dy) %>% summarise(SumOfamount = sum(SumOfamount))
 
@@ -167,8 +180,12 @@ PaidCase_HH_lrg_triangle <- as.triangle(PaidCase_3rd_lrg,origin = "ay", dev = "d
 PaidCase_HH_lrg_triangle <- triangle( PaidCase_HH_lrg_triangle[,10], PaidCase_HH_lrg_triangle[,9], PaidCase_HH_lrg_triangle[,1], PaidCase_HH_lrg_triangle[,2], PaidCase_HH_lrg_triangle[,3], PaidCase_HH_lrg_triangle[,4], PaidCase_HH_lrg_triangle[,5], PaidCase_HH_lrg_triangle[,6], PaidCase_HH_lrg_triangle[,7], PaidCase_HH_lrg_triangle[,8] )
 PaidCase_HH_lrg_triangle
 
+plot(PaidCase_HH_lrg_triangle, lattice=TRUE)
+plot(predict(chainladder(PaidCase_HH_lrg_triangle)))
+
 ata(PaidCase_HH_lrg_triangle)
 
+###
 
 PaidCase_3rd_sml <- dt_PaidCase %>% filter(Business == "3rd Party" & ClaimSize == "Small") %>% group_by(ay, dy) %>% summarise(SumOfamount = sum(SumOfamount))
 
@@ -177,8 +194,12 @@ PaidCase_3rd_sml_triangle <- as.triangle(PaidCase_3rd_sml,origin = "ay", dev = "
 PaidCase_3rd_sml_triangle <- triangle( PaidCase_3rd_sml_triangle[,10], PaidCase_3rd_sml_triangle[,9], PaidCase_3rd_sml_triangle[,1], PaidCase_3rd_sml_triangle[,2], PaidCase_3rd_sml_triangle[,3], PaidCase_3rd_sml_triangle[,4], PaidCase_3rd_sml_triangle[,5], PaidCase_3rd_sml_triangle[,6], PaidCase_3rd_sml_triangle[,7], PaidCase_3rd_sml_triangle[,8] )
 PaidCase_3rd_sml_triangle
 
+plot(PaidCase_3rd_sml_triangle, lattice=TRUE)
+plot(predict(chainladder(PaidCase_3rd_sml_triangle)))
+
 ata(PaidCase_3rd_sml_triangle)
 
+###
 
 PaidCase_3rd_lrg <- dt_PaidCase %>% filter(Business == "3rd Party" & ClaimSize == "Large") %>% group_by(ay, dy) %>% summarise(SumOfamount = sum(SumOfamount))
 
@@ -186,6 +207,9 @@ PaidCase_3rd_lrg_triangle <- as.triangle(PaidCase_3rd_lrg,origin = "ay", dev = "
 
 PaidCase_3rd_lrg_triangle <- triangle( PaidCase_3rd_lrg_triangle[,10], PaidCase_3rd_lrg_triangle[,9], PaidCase_3rd_lrg_triangle[,1], PaidCase_3rd_lrg_triangle[,2], PaidCase_3rd_lrg_triangle[,3], PaidCase_3rd_lrg_triangle[,4], PaidCase_3rd_lrg_triangle[,5], PaidCase_3rd_lrg_triangle[,6], PaidCase_3rd_lrg_triangle[,7], PaidCase_3rd_lrg_triangle[,8] )
 PaidCase_3rd_lrg_triangle
+
+plot(PaidCase_3rd_lrg_triangle, lattice=TRUE)
+plot(predict(chainladder(PaidCase_3rd_lrg_triangle)))
 
 ata(PaidCase_3rd_lrg_triangle)
 ```
@@ -201,7 +225,9 @@ So hopefully by this time you know how the losses were calculated for you to use
 There are a couple of different types of business in the data from previous lesson. 
 What do you think, how long are the average delays in payments? Set up a table, that will 
 _show your assumptions and commit it to your git repository._
-
+```{r}
+summary(dt_KPI)
+```
 
 ### Discounting  losses
 It is very unlikely, that we incur the whole loss on the *very first day*. This allows the insurance company to *invest* the premium received and earn som interest on it. So one way of thinking about our previous example would be to think about *the future value of money* collected at the time of the claim. In reality we need to know the answers now, so *discounting the losses* is more practical then earning interest on expenses.
