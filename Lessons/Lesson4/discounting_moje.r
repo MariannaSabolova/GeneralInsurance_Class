@@ -161,7 +161,7 @@ Hint: Sum Paid and Case together to come up with the final claims estimates (the
 ```{r}
 PaidCase_HH_sml <- dt_PaidCase %>% filter(Business == "House" & ClaimSize == "Small") %>% group_by(ay, dy) %>% summarise(SumOfamount = sum(SumOfamount))
 
-PaidCase_HH_sml_triangle <- as.triangle(PaidCase_3rd_lrg,origin = "ay", dev = "dy", "SumOfamount") 
+PaidCase_HH_sml_triangle <- as.triangle(PaidCase_HH_sml,origin = "ay", dev = "dy", "SumOfamount") 
 
 PaidCase_HH_sml_triangle <- triangle( PaidCase_HH_sml_triangle[,10], PaidCase_HH_sml_triangle[,9], PaidCase_HH_sml_triangle[,1], PaidCase_HH_sml_triangle[,2], PaidCase_HH_sml_triangle[,3], PaidCase_HH_sml_triangle[,4], PaidCase_HH_sml_triangle[,5], PaidCase_HH_sml_triangle[,6], PaidCase_HH_sml_triangle[,7], PaidCase_HH_sml_triangle[,8] )
 PaidCase_HH_sml_triangle
@@ -175,7 +175,7 @@ ata(PaidCase_HH_sml_triangle)
 
 PaidCase_HH_lrg <- dt_PaidCase %>% filter(Business == "House" & ClaimSize == "Large") %>% group_by(ay, dy) %>% summarise(SumOfamount = sum(SumOfamount))
 
-PaidCase_HH_lrg_triangle <- as.triangle(PaidCase_3rd_lrg,origin = "ay", dev = "dy", "SumOfamount") 
+PaidCase_HH_lrg_triangle <- as.triangle(PaidCase_HH_lrg,origin = "ay", dev = "dy", "SumOfamount") 
 
 PaidCase_HH_lrg_triangle <- triangle( PaidCase_HH_lrg_triangle[,10], PaidCase_HH_lrg_triangle[,9], PaidCase_HH_lrg_triangle[,1], PaidCase_HH_lrg_triangle[,2], PaidCase_HH_lrg_triangle[,3], PaidCase_HH_lrg_triangle[,4], PaidCase_HH_lrg_triangle[,5], PaidCase_HH_lrg_triangle[,6], PaidCase_HH_lrg_triangle[,7], PaidCase_HH_lrg_triangle[,8] )
 PaidCase_HH_lrg_triangle
