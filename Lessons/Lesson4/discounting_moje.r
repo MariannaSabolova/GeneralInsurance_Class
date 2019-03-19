@@ -228,7 +228,9 @@ _show your assumptions and commit it to your git repository._
 ```{r}
 summary(dt_KPI)
 ```
-
+# Vyplatenie nárokov za poistenie House trvá približne 5 rokov, A strata potom rýchlo klesá k 0 (lahšie chvosty). Pri poistení 3rd Party sa nároky vyplácajú po dlhšom čase (ťažšie chvosty). 
+                                                                                    
+                                                                                    
 ### Discounting  losses
 It is very unlikely, that we incur the whole loss on the *very first day*. This allows the insurance company to *invest* the premium received and earn som interest on it. So one way of thinking about our previous example would be to think about *the future value of money* collected at the time of the claim. In reality we need to know the answers now, so *discounting the losses* is more practical then earning interest on expenses.
 
