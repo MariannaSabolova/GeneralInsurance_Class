@@ -1,0 +1,114 @@
+DATA + veci z hodiny
+
+```{r}
+library(dplyr)
+dt_Policy <- read.csv("./Data/lesson5_PolicyHistory.csv") %>% distinct(NrPolicy, NrObject, .keep_all = TRUE) 
+dt_Policy %>% nrow()
+dt_Policy %>% distinct(NrPolicy, NrObject) %>% nrow() 
+
+dt_Claims <- read.csv("./Data/lesson5_Claims.csv") %>% distinct(NrClaim, .keep_all = TRUE)
+dt_Claims %>% nrow()
+dt_Claims %>% distinct(NrClaim) %>% nrow()
+
+dt_Claims %>% distinct(NrPolicy, NrObject) %>% nrow()
+
+dt_pol_w_claims <- left_join(dt_Policy, dt_Claims, by = c("NrPolicy", "NrObject"))
+```
+
+
+
+```{r}
+dt_pol_w_claims %>% filter(!is.na(Paid)) %>% select(Paid) %>% arrange(desc(Paid)) %>% head()
+
+dt_pol_w_claims %>% filter(!is.na(Paid)) %>% select(Paid, Dt_Exp_Start, Dt_Exp_End) %>% arrange(desc(Paid)) %>% head()
+```
+
+```{r}
+library(lubridate)
+dt_pol_w_claims <- 
+  dt_pol_w_claims %>% mutate(Time_Exposure = lubridate::dmy(Dt_Exp_End) - lubridate::dmy(Dt_Exp_Start))
+
+dt_pol_w_claims %>% filter(!is.na(Paid)) %>% select(Paid, Dt_Exp_Start, Dt_Exp_End, Time_Exposure)  %>% 
+  arrange(desc(Paid)) %>% head()
+
+
+dt_pol_w_claims <- 
+  dt_pol_w_claims %>% mutate(Ult_Loss = Paid + Reserves, Burning_Cost = ifelse(is.na(Ult_Loss), 0,  Ult_Loss / as.integer(Time_Exposure)))
+
+dt_pol_w_claims %>% filter(!is.na(Paid)) %>% select(Paid, Reserves, Ult_Loss, Burning_Cost) %>% head()
+```
+
+ANALYZA DALSICH FAKTOROV:
+
+1) Analyzovala som D_age, lebo vek vodica a s tym spojene aj jeho skusenosti su velmi dolezite. 
+   Nachadzaju sa tu aj data, podla ktorych mame poistenych starsich ako 100 rokov, povazujem to za chybne data, cize som ich odfiltrovala. Najvacie Burning cost su vo veku okolo 45 rokov a potom je menej a opat okolo 55 rokov su zase vyssie (deti vlastnikov?).
+   
+```{r}
+library(ggplot2)
+dt_pol_w_claims %>% 
+  filter(D_age < 100) %>%
+  ggplot(aes(y = Burning_Cost, x = D_age)) + 
+  geom_jitter() + ylim(0,500)
+```
+
+
+```{r}
+dt_pol_w_claims %>% 
+  group_by(D_age) %>% 
+  summarise(BC_avg = mean(Burning_Cost, na.rm  = TRUE),
+            BC_median = median(Burning_Cost, na.rm = TRUE),
+            cnt = n()) %>% 
+  arrange(desc(BC_avg))
+```
+
+```{r}
+model1 <- glm(data = dt_pol_w_claims %>% filter(Burning_Cost != 0, Burning_Cost < 100, D_age < 100),
+              formula = Burning_Cost ~ D_age,
+              family = Gamma())
+summary(model1)
+```
+
+p-hodnota je viac ako 5%, cize vek vodica (vlastnika auta) sa neukazuje ako dolezity pri modelovani.
+
+
+2)
+
+Skusim, ci ma vplyv vek auta, pricom ocakavam, ze by to malbytnegativny vplyv. 
+Najvyssie Burning-cost maju auta vyrobene okolo roku 2010, ale pre starsie mame malo dat.
+
+```{r}
+library(ggplot2)
+dt_pol_w_claims %>% 
+  ggplot(aes(y = Burning_Cost, x = Construct_year)) + 
+  geom_jitter() + ylim(0,100)
+```
+
+
+```{r}
+dt_pol_w_claims %>% 
+  group_by(Construct_year) %>% 
+  summarise(BC_avg = mean(Burning_Cost, na.rm  = TRUE),
+            BC_median = median(Burning_Cost, na.rm = TRUE),
+            cnt = n()) %>% 
+  arrange(desc(BC_avg))
+```
+
+```{r}
+model2 <- glm(data = dt_pol_w_claims %>% filter(Burning_Cost != 0, Burning_Cost < 100),
+              formula = Burning_Cost ~ Construct_year,
+              family = Gamma())
+summary(model2)
+```
+
+Podla vypoctov ani vek auta nema signifikantny vplyv na modelovanie (opat je p-value viac ako 5%).
+
+```{r}
+model3 <- glm(data = dt_pol_w_claims %>% filter(Burning_Cost != 0, Burning_Cost < 100),
+              formula = Burning_Cost ~ D_age + Construct_year ,
+              family = Gamma())
+summary(model3)
+```
+
+Ked som pouzila model s oboma premennymi, tak je vek vodica uz signifikantny a vek vozidla stale nie. 
+Bolo by zrejme vhodne viac vycistit data a odstranit viac outlierov, pripadne pridat aj viac dat. 
+Verim, ze by potom boli oba faktory dolezite. 
