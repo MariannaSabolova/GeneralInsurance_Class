@@ -1,0 +1,99 @@
+```{r}
+
+library(dplyr)
+
+# load data
+dt_pol_w_claims <-
+  readRDS("C:/GeneralInsurance_Class/Data/lesson6_dt_pol_w_claims.rds")
+
+# split the dataset into Modeling and Validation part
+set.seed(79797979) # to fix randomizer
+ind <-
+  sample(2,
+         nrow(dt_pol_w_claims),
+         replace = TRUE,
+         prob = c(0.80, 0.20)) # generate random indicator to split by
+
+dt_pol_w_claims <- mutate(dt_pol_w_claims,
+                          data_status = ifelse(ind == 1,
+                                               "Training",
+                                               ifelse(ind == 2,
+                                                      "Validation",
+                                                      "Unseen")))
+
+train <- dt_pol_w_claims %>% filter(data_status == "Training")
+val <- dt_pol_w_claims %>% filter(data_status == "Validation")
+
+# definition of the MSE metric
+mse <- function(prediction, actual) {
+  return(sum((prediction - actual) ^ 2, na.rm = TRUE) / length(prediction))
+}
+```
+
+This was the glm model I fit in the last homework.
+```{r}
+model1 <- glm(data = dt_pol_w_claims %>% filter(Burning_Cost != 0, Burning_Cost < 100),
+              formula = Burning_Cost ~ D_age + Construct_year,
+              family = Gamma())
+summary(model1)
+```
+
+```{r}
+mse(predict(model1, train, type = "response"), train$Burning_Cost) #202.0247
+mse(predict(model1, val, type = "response"), val$Burning_Cost) #270.5593
+```
+
+
+Let's try to add one more variable.
+```{r}
+model2 <- glm(data = dt_pol_w_claims %>% filter(Burning_Cost != 0, Burning_Cost < 100),
+              formula = Burning_Cost ~ D_age + Construct_year + Veh_type2,
+              family = Gamma())
+summary(model2)
+```
+
+Model is only little bit better.
+```{r}
+mse(predict(model2, train, type = "response"), train$Burning_Cost) #197.8923
+mse(predict(model2, val, type = "response"), val$Burning_Cost) #269.614
+```
+
+The variable Construct_year doesn't seem to be significant. 
+```{r}
+model3 <- glm(data = dt_pol_w_claims %>% filter(Burning_Cost != 0, Burning_Cost < 100),
+              formula = Burning_Cost ~ D_age + Veh_type2,
+              family = Gamma())
+summary(model3)
+```
+
+Model is only little bit better.
+```{r}
+mse(predict(model3, train, type = "response"), train$Burning_Cost) #197.9888
+mse(predict(model3, val, type = "response"), val$Burning_Cost) #270.5963
+```
+
+
+Category Grouping:
+```{r}
+train <- train %>% mutate(Veh_type2 = ifelse(as.character(Veh_type2) == 'PICKUP' | as.character(Veh_type2) == 'CAR', 'CAR & PICKUP', as.character(Veh_type2)))
+model4 <- glm(data = train,
+              formula = Burning_Cost ~ D_age + Veh_type2, 
+              family = Gamma())
+summary(model4)
+```
+
+```{r}
+mse(predict(model4, train, type = "response"), train$Burning_Cost) #198.3145
+mse(predict(model4, val %>% mutate(
+  Veh_type2 = ifelse(
+    as.character(Veh_type2) == 'PICKUP' |  as.character(Veh_type2) == 'CAR',
+    'CAR & PICKUP',
+    as.character(Veh_type2)
+  )
+), type = "response"),
+val$Burning_Cost) #272.55
+```
+
+Zgrupovanie nepomohlo, prave naopak sa model zhorsil(mse vzrastlo).
+Najlepsi bol model2.
+Asi by bolo dobre skusit pridat inu kominaciu faktorov alebo skusit ine zoskupenie dat do skupin.
